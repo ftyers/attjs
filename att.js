@@ -3,11 +3,12 @@ class ATT {
     console.log('ATT:' + t.length);
     this.t = t;
     this.compile();
+    this.e = "@0@";
   }
 
   compile() { 
       console.log('compile:');
-      this.states = {};
+      this.states = new Set();
       this.transitions = {};
       this.finals = {};
       this.initial_state = 0;
@@ -24,7 +25,7 @@ class ATT {
         let inn = [this.t[i][0], this.t[i][2]];
         let out = [this.t[i][1], this.t[i][3]];
         if(!(state in this.states)) {
-          this.states[state] = [];
+          this.states.add(state);
         }
         if(!(inn in this.transitions)) {
           
@@ -38,40 +39,78 @@ class ATT {
 
   step(state, c) { 
     console.log('step: ' + state + " ||| " + c);
-    return {0:""};
+    let reached_states = new Set();
+    if(state in this.finals) {
+      return reached_states.add(state);
+    }
+    let transition = [state, c];
+    console.log('# ' + transition);
+    if(transition in this.transitions) {
+      for(let target of this.transitions[transition]) {
+        this.closure(target[0], reached_states);
+        reached_states.add(state[0]);
+        if(!(state[1] in this.state_output_pairs)) {
+          this.state_output_pairs[state[0]] = new Set();
+        }
+        for(let pair of this.state_output_pairs[state]) {
+          this.state_output_pairs[state[0]].add([pair[1] + state[1], state[0]]);
+        }
+        this.closure(target[0], reached_states);
+      }
+    }
+
+    return reached_states;
   }
 
-  closure() { 
-    console.log('closure:');
+  closure(S, reached_states) { 
+    console.log('closure: ' + S);
 
+    if(!(S in this.state_output_pairs)) {
+      this.state_output_pairs[S] = new Set();
+    }
+    let transition = [S, this.e];
+    if(transition in this.transitions) {
+      for(let state in transitions[transition]) {
+        reached_states.add(state[1]);
+        
+        if(!(state[1] in this.state_output_pairs)) {
+          this.state_output_pairs[state[1]] = new Set();
+        }
+
+        for(let pair of this.state_output_pairs[state]) {
+          this.state_output_pairs[state[1]].add([pair[0] + state[0], state[1]]);
+        }
+
+        this.closure(state[1], reached_states);
+      }
+    }
+    return reached_states;
   }
+
 
   _union(a, b) {
-    let au = {}; 
-    for(let i = 0; i < a.length; i++) {
-      au[a[i]] = "";
+    let ab = new Set(a)
+    for (let elem of b) {
+      ab.add(elem)
     }
-    for(let i = 0; i < b.length; i++) {
-      au[b[i]] = "";
-    }
-    return au;
+    return ab;
   }
 
   lookup(s) { 
     console.log('lookup:' + s);
-    let state_output_pairs = {};    
+    this.state_output_pairs = {};    
+    this.state_output_pairs[0] = new Set([['', 0]]); 
     let accepting_output_pairs = {};    
-    let current_states = {0:""};
+    let current_states = new Set([0]); 
     let input = s;
     let i = 0;
     while(i < s.length) { 
-      console.log('|' + i + " " + s[i] + " ||| " + Object.keys(current_states).length + " ||| " + current_states);
-      let reached_states = {};
-      for(let j = 0; j <= Object.keys(current_states).length; j++) {
-        console.log('@' + j);
-        let state = current_states[j];
-        if(!(state in state_output_pairs)) {
-          state_output_pairs[state] = {}
+      console.log('| ' + i + " " + s[i] + " ||| " + current_states);
+      let reached_states = new Set();
+      for(let state of current_states) {
+        console.log('@ state:' + state);
+        if(!(state in this.state_output_pairs)) {
+          this.state_output_pairs[state] = {}
         }
         let reached = this.step(state, s[i]);
         reached_states = this._union(reached_states, reached);
