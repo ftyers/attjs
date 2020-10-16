@@ -20,7 +20,7 @@ class ATT {
           this.finals[state] = [];
 	  continue;
         }
-        console.log('|' + this.t[i])
+        //console.log('|' + this.t[i])
         let state = this.t[i][0];
         let inn = [this.t[i][0], this.t[i][2]];
         let out = [this.t[i][1], this.t[i][3]];
@@ -49,7 +49,8 @@ class ATT {
       for(let target of this.transitions[transition]) {
         this.closure(target[0], reached_states);
         reached_states.add(state);
-        for (let item of reached_states.values()) { console.log('   TRS: ' + item); }
+        console.log('   Reached:');
+        console.log(reached_states);
         if(!(state[1] in this.state_output_pairs)) {
           this.state_output_pairs[state] = new Set();
         }
@@ -59,8 +60,8 @@ class ATT {
         this.closure(target[0], reached_states);
       }
     }
-    console.log('   < step: ' + reached_states);
-    for (let item of reached_states.values()) { console.log('SRS:' + item); }
+    console.log('   < step: ' + reached_states + ' Reached:');
+    console.log(reached_states);
     console.log('   ----');
     return reached_states;
   }
@@ -90,8 +91,8 @@ class ATT {
         this.closure(state[0], reached_states);
       }
     }
-    console.log('   < closure: ' + reached_states.size);
-    for (let item of reached_states.values()) { console.log('CRS:' + item); }
+    console.log('   < closure: ' + reached_states.size + ' Reached:');
+    console.log(reached_states);
     console.log('   ----');
     return reached_states;
   }
