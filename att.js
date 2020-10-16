@@ -36,8 +36,9 @@ class ATT {
       console.log(this.transitions);
   }
 
-  step(c) { 
-    console.log('step:' + c);
+  step(state, c) { 
+    console.log('step: ' + state + " ||| " + c);
+    return {0:""};
   }
 
   closure() { 
@@ -45,8 +46,8 @@ class ATT {
 
   }
 
-  _union(a,b) {
-    au = {}; 
+  _union(a, b) {
+    let au = {}; 
     for(let i = 0; i < a.length; i++) {
       au[a[i]] = "";
     }
@@ -64,14 +65,15 @@ class ATT {
     let input = s;
     let i = 0;
     while(i < s.length) { 
-      console.log('|' + i + " " + s[i] + " ||| " + current_states);
+      console.log('|' + i + " " + s[i] + " ||| " + Object.keys(current_states).length + " ||| " + current_states);
       let reached_states = {};
-      for(let j = 0; j < current_states.length; j++) {
-        state = current_states[j];
+      for(let j = 0; j <= Object.keys(current_states).length; j++) {
+        console.log('@' + j);
+        let state = current_states[j];
         if(!(state in state_output_pairs)) {
           state_output_pairs[state] = {}
         }
-        let reached = step(state, s[i]);
+        let reached = this.step(state, s[i]);
         reached_states = this._union(reached_states, reached);
       }
       current_states = reached_states;
