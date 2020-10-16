@@ -38,52 +38,61 @@ class ATT {
   }
 
   step(state, c) { 
-    console.log('step: ' + state + " ||| " + c);
+    console.log('   > step: ' + state + " ||| " + c);
     let reached_states = new Set();
     if(state in this.finals) {
       return reached_states.add(state);
     }
     let transition = [state, c];
-    console.log('# ' + transition);
+    console.log('   # ' + transition);
     if(transition in this.transitions) {
       for(let target of this.transitions[transition]) {
         this.closure(target[0], reached_states);
-        reached_states.add(state[0]);
+        reached_states.add(state);
+        for (let item of reached_states.values()) { console.log('   TRS: ' + item); }
         if(!(state[1] in this.state_output_pairs)) {
-          this.state_output_pairs[state[0]] = new Set();
+          this.state_output_pairs[state] = new Set();
         }
         for(let pair of this.state_output_pairs[state]) {
-          this.state_output_pairs[state[0]].add([pair[1] + state[1], state[0]]);
+          this.state_output_pairs[state].add([pair[1], state[0]]);
         }
         this.closure(target[0], reached_states);
       }
     }
-
+    console.log('   < step: ' + reached_states);
+    for (let item of reached_states.values()) { console.log('SRS:' + item); }
+    console.log('   ----');
     return reached_states;
   }
 
   closure(S, reached_states) { 
-    console.log('closure: ' + S);
+    console.log('   > closure: ' + S);
 
     if(!(S in this.state_output_pairs)) {
       this.state_output_pairs[S] = new Set();
     }
     let transition = [S, this.e];
+    console.log('   %: ' + transition);
     if(transition in this.transitions) {
+      console.log('    trans: ' + transition);
       for(let state in transitions[transition]) {
-        reached_states.add(state[1]);
+        console.log('    state: ' + state);
+        reached_states.add(state[0]);
         
         if(!(state[1] in this.state_output_pairs)) {
-          this.state_output_pairs[state[1]] = new Set();
+          this.state_output_pairs[state[0]] = new Set();
         }
 
         for(let pair of this.state_output_pairs[state]) {
-          this.state_output_pairs[state[1]].add([pair[0] + state[0], state[1]]);
+          this.state_output_pairs[state[0]].add([pair[0] + state[0], state[1]]);
         }
 
-        this.closure(state[1], reached_states);
+        this.closure(state[0], reached_states);
       }
     }
+    console.log('   < closure: ' + reached_states.size);
+    for (let item of reached_states.values()) { console.log('CRS:' + item); }
+    console.log('   ----');
     return reached_states;
   }
 
@@ -105,16 +114,19 @@ class ATT {
     let input = s;
     let i = 0;
     while(i < s.length) { 
-      console.log('| ' + i + " " + s[i] + " ||| " + current_states);
+      console.log('----------------------------------------------');
+      console.log('| ' + i + " " + s[i] + " ||| " + current_states.size);
       let reached_states = new Set();
       for(let state of current_states) {
-        console.log('@ state:' + state);
+        for (let item of current_states.values()) { console.log('CS:' + item); }
+        console.log('@ state: ' + state);
         if(!(state in this.state_output_pairs)) {
           this.state_output_pairs[state] = {}
         }
         let reached = this.step(state, s[i]);
         reached_states = this._union(reached_states, reached);
       }
+      console.log('& ' + i + " " + s[i] + " ||| " + reached_states.size);
       current_states = reached_states;
 
       input += s[i]
