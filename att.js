@@ -17,7 +17,7 @@ class ATT {
         if(this.t[i].length == 2) {
           console.log('F:' + this.t[i]);
           let state = this.t[i][0];
-          this.finals[state] = [];
+          this.finals[state] = this.t[i][1];
 	  continue;
         }
         //console.log('|' + this.t[i])
@@ -37,25 +37,25 @@ class ATT {
       console.log(this.transitions);
   }
 
-  step(state, c) { 
-    console.log('   > step: ' + state + " ||| " + c);
+  step(S, c) { 
+    console.log('   > step: ' + S + " ||| " + c);
     let reached_states = new Set();
-    if(state in this.finals) {
-      return reached_states.add(state);
-    }
-    let transition = [state, c];
-    console.log('   # ' + transition);
+//    if(S in this.finals) {
+//      return reached_states.add(S);
+//    }
+    let transition = [S, c];
     if(transition in this.transitions) {
+      console.log('   # ' + transition);
       for(let target of this.transitions[transition]) {
         this.closure(target[0], reached_states);
-        reached_states.add(state);
-        console.log('   Reached:');
+        reached_states.add(target[0]);
+        console.log('[1]   Reached:');
         console.log(reached_states);
-        if(!(state[1] in this.state_output_pairs)) {
-          this.state_output_pairs[state] = new Set();
+        if(!(target[0] in this.state_output_pairs)) {
+          this.state_output_pairs[target[0]] = new Set();
         }
-        for(let pair of this.state_output_pairs[state]) {
-          this.state_output_pairs[state].add([pair[1], state[0]]);
+        for(let pair of this.state_output_pairs[target[0]]) {
+          this.state_output_pairs[target[0]].add([pair[1], target[0]]);
         }
         this.closure(target[0], reached_states);
       }
@@ -119,7 +119,7 @@ class ATT {
       console.log('| ' + i + " " + s[i] + " ||| " + current_states.size);
       let reached_states = new Set();
       for(let state of current_states) {
-        for (let item of current_states.values()) { console.log('CS:' + item); }
+        console.log(this.state_output_pairs);
         console.log('@ state: ' + state);
         if(!(state in this.state_output_pairs)) {
           this.state_output_pairs[state] = {}
@@ -128,6 +128,7 @@ class ATT {
         reached_states = this._union(reached_states, reached);
       }
       console.log('& ' + i + " " + s[i] + " ||| " + reached_states.size);
+      console.log(reached_states);
       current_states = reached_states;
 
       input += s[i]
