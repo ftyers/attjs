@@ -176,6 +176,7 @@ class ATT {
           delete this.new_output_pairs[state];
         }
         this.state_output_pairs = this.new_output_pairs;
+        this.new_output_pairs = {};
       }
       current_states = reached_states; 
 
