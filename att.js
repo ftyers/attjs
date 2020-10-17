@@ -7,10 +7,11 @@ class ATT {
   }
 
   compile() { 
+      // Our transition table is [in_state, in_char] → [out_state, out_char]
       console.log('compile:');
       this.states = new Set();
-      this.transitions = {}; // Add weights
-      this.finals = new Set(); // Add weights
+      this.transitions = {}; // TODO: Add weights
+      this.finals = new Set(); // TODO: Add weights
       this.initial_state = 0;
    
       for(let i = 0; i < this.t.length; i++) 
@@ -18,7 +19,7 @@ class ATT {
         let state = parseInt(this.t[i][0]);
         if(this.t[i].length == 2) 
         {
-          this.finals.add(state); // = this.t[i][1];
+          this.finals.add(state);
 	  continue;
         }
         let inn = [parseInt(this.t[i][0]), this.t[i][2]];
@@ -42,7 +43,7 @@ class ATT {
     console.log('   > step: ' + S + " ||| " + c);
     // Set up a new set of states that we reach from this step
     let reached_states = new Set();
-    if(S in this.finals) 
+    if(this.finals.has(S)) 
     { // Not sure about this, what happens if we hit a final before consuming all input?
       return reached_states.add(S);
     }
