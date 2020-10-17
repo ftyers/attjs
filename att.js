@@ -43,10 +43,10 @@ class ATT {
     console.log('   > step: ' + S + " ||| " + c);
     // Set up a new set of states that we reach from this step
     let reached_states = new Set();
-    if(this.finals.has(S)) 
-    { // Not sure about this, what happens if we hit a final before consuming all input?
-      return reached_states.add(S);
-    }
+//    if(this.finals.has(S)) 
+//    { // Not sure about this, what happens if we hit a final before consuming all input?
+//      return reached_states.add(S);
+//    }
 
     // Our transition is [in_state, in_char] → [out_state, out_char]
     let transition = [S, c];
@@ -66,7 +66,8 @@ class ATT {
         { 
           this.state_output_pairs[reached_state] = new Set();
         }
-        for(let pair of this.state_output_pairs[S].values()) // For each of the current pairs we make a new pair
+        var pairs = Array.from(this.state_output_pairs[S].values());
+        for(let pair of pairs) // For each of the current pairs we make a new pair
         { 
           
           console.log(pair[0] + " /// " + pair[1]);
@@ -164,7 +165,7 @@ class ATT {
         }
         let reached = this.step(state, s[i]); // Step the transducer
         reached_states = this._union(reached_states, reached); 
-        delete this.state_output_pairs[state];
+//        delete this.state_output_pairs[state];
       }
       current_states = reached_states; 
 
