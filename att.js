@@ -188,14 +188,14 @@ class ATT {
     while(i < s.length) 
     { 
       console.log(i);
-      step(s[i]);
+      this.step(s[i]);
       input += s[i];
       i++;
     }
 
     console.log('Accepting:');
     console.log(this.finals);
-    for(let state of current_states) 
+    for(let state of this.current_states) 
     {
       console.log('?');
       let output_pairs = this.state_output_pairs[state];
