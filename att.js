@@ -62,12 +62,12 @@ class ATT {
         reached_states.add(reached_state);
         console.log('    [1]   Reached:');
         console.log(reached_states);
-        this.new_output_pairs = this.state_output_pairs
+        this.new_output_pairs = {};
         if(!(reached_state in this.new_output_pairs)) // We create a new s,o set
         { 
-          this.state_output_pairs[reached_state] = new Set();
+          this.new_output_pairs[reached_state] = new Set();
         }
-        var pairs = Array.from(this.new_output_pairs[S].values());
+        var pairs = Array.from(this.state_output_pairs[S].values());
         for(let pair of pairs) // For each of the current pairs we make a new pair
         { 
           
@@ -106,13 +106,13 @@ class ATT {
 //        console.log('    output_sym: ' + reached_state);
         reached_states.add(reached_state);
         
-        this.new_output_pairs = this.state_output_pairs;
-        if(!(reached_state in this.new_output_pairs)) 
+        this.new_output_pairs = {};
+        if(!(reached_state in this.state_output_pairs)) 
         {
           this.new_output_pairs[reached_state] = new Set();
         }
 
-        for(let pair of this.new_output_pairs[S].values()) 
+        for(let pair of this.state_output_pairs[S].values()) 
         {
           let output_pair = {0: pair[0] + output_symbol, 1: reached_state};
 //          console.log('[2] OP:');
