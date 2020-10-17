@@ -9,11 +9,17 @@
 <script>
    var att = new ATT(test);
 
-   res = att.lookup("wound");
+   let res = att.lookup("wound");
    //att.lookup("pemhɛ");
    //att.lookup("pemhɛnɛ");
    console.log('HTML:');
-  console.log(res); 
+      console.log(res);
+   for(let str of res.values()) 
+   {
+      console.log(str);
+      document.write(str);
+      document.write('<br>');
+   }
   </script>
 
 </body>

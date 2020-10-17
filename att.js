@@ -73,8 +73,6 @@ class ATT {
           console.log('[1] OP:');
           console.log(output_pair);
           this.state_output_pairs[reached_state].add(output_pair);
-          console.log(JSON.stringify(output_pair));
-          console.log(JSON.stringify(this.state_output_pairs));
         }
         this.closure(reached_state, reached_states);
       }
@@ -174,15 +172,16 @@ class ATT {
     for(let state of current_states) 
     {
       console.log('?');
-      let output_pair = this.state_output_pairs[state];
+      let output_pairs = this.state_output_pairs[state];
       console.log(state);
-      console.log(output_pair);
-      console.log(output_pair[0]);
-      console.log(output_pair[1]);
-      if(this.finals.has(output_pair[1]))
+      console.log(output_pairs);
+      if(this.finals.has(state))
       {
-        console.log('ACCEPT:' + output_pair[0]);
-        accepting_output_pairs.add(output_pair[0]);
+        for(let output_pair of output_pairs.values()) 
+        {
+          console.log('ACCEPT:' + output_pair[0]);
+          accepting_output_pairs.add(output_pair[0]);
+        }
       }
     }
 
