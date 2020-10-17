@@ -1,7 +1,7 @@
 <html>
 <head>
 <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">
- <script src="test.js"></script>  <!-- the ATT transducer in javascript -->
+ <script src="test2.js"></script>  <!-- the ATT transducer in javascript -->
  <script src="att.js"></script> 
 </head>
 <body>
@@ -9,9 +9,9 @@
 <script>
    var att = new ATT(test);
 
-   let res = att.lookup("wound");
-   //att.lookup("pemhɛ");
-   //att.lookup("pemhɛnɛ");
+   //let res = att.lookup("wound");
+   //let res = att.lookup("pemhɛ");
+   let res = att.lookup("pemhɛnɛ");
    console.log('HTML:');
       console.log(res);
    for(let str of res.values()) 

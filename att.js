@@ -165,8 +165,7 @@ class ATT {
         reached_states = this._union(reached_states, reached); 
         delete this.state_output_pairs[state];
       }
-      console.log(reached_states);
-      current_states = reached_states;
+      current_states = reached_states; 
 
       input += s[i]
       i++;
