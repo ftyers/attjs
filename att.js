@@ -146,7 +146,7 @@ class ATT {
     this.state_output_pairs = {};
     this.state_output_pairs[0] = new Set();
     this.state_output_pairs[0].add({0: '', 1: 0});
-    this.new_output_pairs = this.state_output_pairs;
+    this.new_output_pairs = {};
   }
 
   lookup(s) { 
