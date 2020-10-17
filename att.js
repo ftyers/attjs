@@ -165,7 +165,10 @@ class ATT {
         }
         let reached = this.step(state, s[i]); // Step the transducer
         reached_states = this._union(reached_states, reached); 
-//        delete this.state_output_pairs[state];
+        if(!(reached_states.has(state))) 
+        {
+          delete this.state_output_pairs[state];
+        }
       }
       current_states = reached_states; 
 
