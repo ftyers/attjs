@@ -62,11 +62,12 @@ class ATT {
         reached_states.add(reached_state);
         console.log('    [1]   Reached:');
         console.log(reached_states);
-        if(!(reached_state in this.state_output_pairs)) // We create a new s,o set
+        this.new_output_pairs = this.state_output_pairs
+        if(!(reached_state in this.new_output_pairs)) // We create a new s,o set
         { 
           this.state_output_pairs[reached_state] = new Set();
         }
-        var pairs = Array.from(this.state_output_pairs[S].values());
+        var pairs = Array.from(this.new_output_pairs[S].values());
         for(let pair of pairs) // For each of the current pairs we make a new pair
         { 
           
@@ -74,8 +75,9 @@ class ATT {
           let output_pair = {0: pair[0] + output_symbol, 1: reached_state};
           console.log('[1] OP:');
           console.log(output_pair);
-          this.state_output_pairs[reached_state].add(output_pair);
+          this.new_output_pairs[reached_state].add(output_pair);
         }
+        this.state_output_pairs = this.new_output_pairs;
         this.closure(reached_state, reached_states);
       }
     }
@@ -104,18 +106,20 @@ class ATT {
 //        console.log('    output_sym: ' + reached_state);
         reached_states.add(reached_state);
         
-        if(!(reached_state in this.state_output_pairs)) 
+        this.new_output_pairs = this.state_output_pairs;
+        if(!(reached_state in this.new_output_pairs)) 
         {
-          this.state_output_pairs[reached_state] = new Set();
+          this.new_output_pairs[reached_state] = new Set();
         }
 
-        for(let pair of this.state_output_pairs[S].values()) 
+        for(let pair of this.new_output_pairs[S].values()) 
         {
           let output_pair = {0: pair[0] + output_symbol, 1: reached_state};
 //          console.log('[2] OP:');
 //          console.log(output_pair);
-          this.state_output_pairs[reached_state].add(output_pair);
+          this.new_output_pairs[reached_state].add(output_pair);
         }
+        this.state_output_pairs = this.new_output_pairs;
 
         this.closure(state[0], reached_states);
       }
@@ -142,6 +146,7 @@ class ATT {
     this.state_output_pairs = {};
     this.state_output_pairs[0] = new Set();
     this.state_output_pairs[0].add({0: '', 1: 0});
+    this.new_output_pairs = this.state_output_pairs;
   }
 
   lookup(s) { 
@@ -156,19 +161,21 @@ class ATT {
       console.log('----------------------------------------------');
       console.log(this.state_output_pairs);
       let reached_states = new Set(); // States have we reached with this input
+      this.new_output_pairs = this.state_output_pairs;
       for(let state of current_states) 
       {
         console.log('@ state: ' + state);
-        if(!(state in this.state_output_pairs)) 
+        if(!(state in this.new_output_pairs)) 
         {
-          this.state_output_pairs[state] = new Set();
+          this.new_output_pairs[state] = new Set();
         }
         let reached = this.step(state, s[i]); // Step the transducer
         reached_states = this._union(reached_states, reached); 
         if(!(reached_states.has(state))) 
         {
-          delete this.state_output_pairs[state];
+          delete this.new_output_pairs[state];
         }
+        this.state_output_pairs = this.new_output_pairs;
       }
       current_states = reached_states; 
 
