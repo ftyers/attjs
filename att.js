@@ -127,6 +127,8 @@ class ATT {
 
 
   _union(a, b) {
+    // A union function for two sets, because it isn't a JS builtin
+    // NB: This is not the same as FST union
     let ab = new Set(a)
     for (let elem of b) {
       ab.add(elem)
@@ -144,24 +146,23 @@ class ATT {
     console.log('lookup: ' + s);
     this.initialise();
     let accepting_output_pairs = new Set();    
-    let current_states = new Set([0]); 
-    let input = s;
-    let i = 0;
+    let current_states = new Set([0]);  // Set of states that the machine is in
+    let input = s[0];  // To keep track of how much input has been consumed
+    let i = 0; 
     while(i < s.length) 
     { 
       console.log('----------------------------------------------');
-      console.log(JSON.stringify(this.state_output_pairs));
-//      console.log('| ' + i + " " + s[i] + " ||| " + current_states.size);
-      let reached_states = new Set();
+      console.log(this.state_output_pairs);
+      let reached_states = new Set(); // States have we reached with this input
       for(let state of current_states) 
       {
         console.log('@ state: ' + state);
         if(!(state in this.state_output_pairs)) 
         {
-          this.state_output_pairs[state] = {}
+          this.state_output_pairs[state] = new Set();
         }
-        let reached = this.step(state, s[i]);
-        reached_states = this._union(reached_states, reached);
+        let reached = this.step(state, s[i]); // Step the transducer
+        reached_states = this._union(reached_states, reached); 
         delete this.state_output_pairs[state];
       }
       console.log(reached_states);
