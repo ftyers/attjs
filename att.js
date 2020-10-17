@@ -134,11 +134,15 @@ class ATT {
     return ab;
   }
 
-  lookup(s) { 
-    console.log('lookup: ' + s);
+  initialise() {
     this.state_output_pairs = {};
     this.state_output_pairs[0] = new Set();
     this.state_output_pairs[0].add({0: '', 1: 0});
+  }
+
+  lookup(s) { 
+    console.log('lookup: ' + s);
+    this.initialise();
     let accepting_output_pairs = new Set();    
     let current_states = new Set([0]); 
     let input = s;
