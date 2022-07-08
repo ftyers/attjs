@@ -1,222 +1,160 @@
 class ATT {
-  constructor(t) { 
-    console.log('ATT:' + t.length);
-    this.t = t;
-    this.compile();
+  constructor(t) {
+    // Our transition table is [in_state, in_char] → [out_state, out_char]
+    this.states = new Set();
+    this.transitions = {}; // TODO: Add weights
+    this.finals = new Set(); // TODO: Add weights
+    this.initial_state = 0;
     this.e = "@0@";
+
+    this.compile(t);
   }
 
-  compile() { 
-      // Our transition table is [in_state, in_char] → [out_state, out_char]
-      console.log('compile:');
-      this.states = new Set();
-      this.transitions = {}; // TODO: Add weights
-      this.finals = new Set(); // TODO: Add weights
-      this.initial_state = 0;
-   
-      for(let i = 0; i < this.t.length; i++) 
-      {
-        let state = parseInt(this.t[i][0]);
-        if(this.t[i].length == 2) 
-        {
-          this.finals.add(state);
-	  continue;
-        }
-        let inn = [parseInt(this.t[i][0]), this.t[i][2]];
-        let out = [parseInt(this.t[i][1]), this.t[i][3]];
-        if(!(state in this.states)) 
-        {
-          this.states.add(state);
-        }
-        if(!(inn in this.transitions)) 
-        {
-          this.transitions[inn] = []
-        }     
-        this.transitions[inn].push(out);
-      }
-      console.log(this.states);
-      console.log(this.transitions);
-      console.log(this.finals);
-  }
-
-  step_state(S, c) { 
-    console.log('   > step_state: ' + S + " ||| " + c);
-    // Set up a new set of states that we reach from this step
-    let reached_states = new Set();
-//    if(this.finals.has(S)) 
-//    { // Not sure about this, what happens if we hit a final before consuming all input?
-//      return reached_states.add(S);
-//    }
-
-    // Our transition is [in_state, in_char] → [out_state, out_char]
-    let transition = [S, c];
-    if(transition in this.transitions) 
-    {
-//      console.log('   # ' + transition);
-      for(let target of this.transitions[transition]) 
-      {
-        let reached_state = parseInt(target[0]);
-        let output_symbol = target[1];
-        console.log("    " + reached_state + " ||| " + output_symbol);
-        reached_states = this.closure(reached_state, reached_states);
-        reached_states.add(reached_state);
-        console.log('    [1]   Reached:');
-        console.log(reached_states);
-        this.new_output_pairs = {};
-        if(!(reached_state in this.new_output_pairs)) // We create a new s,o set
-        { 
-          this.new_output_pairs[reached_state] = new Set();
-        }
-        var pairs = Array.from(this.state_output_pairs[S].values());
-        for(let pair of pairs) // For each of the current pairs we make a new pair
-        { 
-          
-          console.log(pair[0] + " /// " + pair[1]);
-          let output_string = pair[0];
-          if(output_symbol != this.e) 
-          {
-            output_string += output_symbol;
-          }      
-          let output_pair = {0: output_string, 1: reached_state};
-          console.log('[1] OP:');
-          console.log(output_pair);
-          this.new_output_pairs[reached_state].add(output_pair);
-        }
-        this.state_output_pairs = this.new_output_pairs;
-        this.closure(reached_state, reached_states);
-      }
+  add_transition(in_state, out_state, in_sym, out_sym, weight) {
+    if (!(in_state in this.states)) {
+      this.states.add(in_state);
     }
-    console.log('   < step_state: ' + reached_states + ' Reached:');
-    console.log(reached_states);
-    console.log(JSON.stringify(this.state_output_pairs));
-    console.log('   ----');
-    return reached_states;
-  }
-
-  closure(S, reached_states) { 
-//    console.log('   > closure: ' + S);
-    if(!(S in this.state_output_pairs)) 
-    {
-      this.state_output_pairs[S] = new Set();
+    let in_pair = [in_state, in_sym];
+    let out_pair = [out_state, out_sym];
+    if (!(in_pair in this.transitions)) {
+      this.transitions[in_pair] = [];
     }
-    let transition = [S, this.e];
-    if(transition in this.transitions) 
-    {
-//      console.log('    trans: ' + transition);
-      for(let target of transitions[transition]) 
-      {
-        let reached_state = parseInt(target[0]);
-        let output_symbol = target[1];
-//        console.log('    state: ' + reached_state);
-//        console.log('    output_sym: ' + reached_state);
-        reached_states.add(reached_state);
-        
-        this.new_output_pairs = {};
-        if(!(reached_state in this.state_output_pairs)) 
-        {
-          this.new_output_pairs[reached_state] = new Set();
-        }
+    this.transitions[in_pair].push(out_pair);
+  }
 
-        for(let pair of this.state_output_pairs[S].values()) 
-        {
-          let output_pair = {0: pair[0] + output_symbol, 1: reached_state};
-//          console.log('[2] OP:');
-//          console.log(output_pair);
-          this.new_output_pairs[reached_state].add(output_pair);
-        }
-        this.state_output_pairs = this.new_output_pairs;
-
-        this.closure(state[0], reached_states);
-      }
+  convert_symbol(sym) {
+    if (sym == "@_EPSILON_SYMBOL_@" || sym == "@0@") {
+      return this.e;
+    } else if (sym == "@_SPACE_@") {
+      return " ";
+    } else if (sym == "@_TAB_@") {
+      return "\t";
+    } else {
+      return sym;
     }
-//    console.log('   < closure: ' + reached_states.size + ' Reached:');
-//    console.log(reached_states);
-//    console.log(this.state_output_pairs);
-//    console.log('   ----');
-    return reached_states;
   }
 
-
-  _union(a, b) {
-    // A union function for two sets, because it isn't a JS builtin
-    // NB: This is not the same as FST union
-    let ab = new Set(a)
-    for (let elem of b) {
-      ab.add(elem)
+  process_array(arr) {
+    if (arr.length == 0) {
+      return;
     }
-    return ab;
-  }
-
-  step(c) {
-      console.log('----------------------------------------------');
-      console.log(this.state_output_pairs);
-      let reached_states = new Set(); // States have we reached with this input
-      for(let state of this.current_states) 
-      {
-        this.new_output_pairs = {}; // this.state_output_pairs;
-        console.log('@ state: ' + state);
-        if(!(state in this.new_output_pairs)) 
-        {
-          this.new_output_pairs[state] = new Set();
-        }
-        let reached = this.step_state(state, c); // Step the transducer
-        reached_states = this._union(reached_states, reached); 
-        if(!(reached_states.has(state))) 
-        {
-          delete this.new_output_pairs[state];
-        }
-        this.state_output_pairs = this.new_output_pairs;
-      }
-      this.current_states = reached_states; 
-  }
-
-  initialise() {
-    this.state_output_pairs = {};
-    this.state_output_pairs[0] = new Set();
-    this.state_output_pairs[0].add({0: '', 1: 0});
-    this.new_output_pairs = {};
-  }
-
-  lookup(s) { 
-    console.log('lookup: ' + s);
-    this.initialise();
-    let accepting_output_pairs = new Set();    
-    this.current_states = new Set([0]);  // Set of states that the machine is in
-    let input = s[0];  // To keep track of how much input has been consumed
-    let i = 0; 
-
-    while(i < s.length) 
-    { 
-      console.log(i);
-      this.step(s[i]);
-      input += s[i];
-      i++;
+    let state = parseInt(arr[0]);
+    if (arr.length < 3) {
+      let weight = (arr.length > 1 ? parseFloat(arr[1]) : 0.0);
+      this.finals.add(state);
+    } else {
+      let out_state = parseInt(arr[1]);
+      let in_sym = this.convert_symbol(arr[2]);
+      let out_sym = this.convert_symbol(arr[3]);
+      let weight = (arr.length > 4 ? parseFloat(arr[4]) : 0.0);
+      this.add_transition(state, out_state, in_sym, out_sym, weight);
     }
+  }
 
-    console.log('Accepting:');
+  compile(arr) {
+    console.log('compile:');
+    if (Array.isArray(arr)) {
+      arr.forEach(this.process_array.bind(this));
+    } else {
+      arr.split('\n')
+        .map(s => s.trim().split('\t'))
+        .forEach(this.process_array.bind(this));
+    }
+    console.log(this.states);
+    console.log(this.transitions);
     console.log(this.finals);
-    for(let state of this.current_states) 
-    {
-      console.log('?');
-      let output_pairs = this.state_output_pairs[state];
-      console.log(state);
-      console.log(output_pairs);
-      if(this.finals.has(state))
-      {
-        for(let output_pair of output_pairs.values()) 
-        {
-          console.log('ACCEPT:' + output_pair[0]);
-          accepting_output_pairs.add(output_pair[0]);
+  }
+
+  epsilon_closure(S) {
+    let ret = {};
+    ret[S] = [''];
+    let todo = new Set();
+    todo.add(S);
+    let next_todo = new Set();
+    while (todo.length > 0) {
+      for (let cur_state of todo) {
+        let cur_pair = [cur_state, this.e];
+        if (cur_pair in this.transitions) {
+          this.transitions[cur_pair].forEach(function(trg) {
+            if (!(trg[0] in ret)) {
+              let s = ret[trg[0]];
+              if (trg[1] != this.e) {
+                s += trg[1];
+              }
+              if (!(trg[0] in ret)) {
+                ret[trg[0]] = [];
+              }
+              ret[trg[0]].push(s);
+              next_todo.push(trg[0]);
+            }
+          });
+        }
+      }
+      todo = next_todo;
+      next_todo.clear();
+    }
+    return ret;
+  }
+
+  step_state(S, c) {
+    console.log('   > step_state: ' + S + " ||| " + c);
+    let trans = [S, c];
+    let ret = {};
+    if (trans in this.transitions) {
+      for (let target of this.transitions[trans]) {
+        let close = this.epsilon_closure(target[0]);
+        console.log("epsilon closure", close);
+        let pre = (target[1] == this.e ? "" : target[1]);
+        for (let dest in close) {
+          if (!(dest in ret)) {
+            ret[dest] = [];
+          }
+          close[dest].map(o => pre + o).forEach(o => ret[dest].push(o));
         }
       }
     }
-
-    return accepting_output_pairs;
+    console.log("step_state return", ret);
+    return ret;
   }
 
-  invert() { 
+  _product(pref, suf) {
+    return pref.map(a => suf.map(b => a + b)).flat();
+  }
+
+  step(ctx, c) {
+    let ret = {};
+    for (let S in ctx) {
+      let pth = this.step_state(S, c);
+      for (let dest in pth) {
+        if (!(dest in ret)) {
+          ret[dest] = [];
+        }
+        console.log("stepping from", S, "to", dest, ctx[S], pth[dest], this._product(ctx[S], pth[dest]));
+        ret[dest] = ret[dest].concat(this._product(ctx[S], pth[dest]));
+      }
+    }
+    return ret;
+  }
+
+  lookup(s) {
+    console.log('lookup: ' + s);
+    let ctx = {};
+    ctx[this.initial_state] = [''];
+    for (let c of s) {
+      ctx = this.step(ctx, c);
+    }
+
+    let ret = new Set();
+
+    for (let state in ctx) {
+      if (this.finals.has(parseInt(state))) {
+        ctx[state].forEach(o => ret.add(o));
+      }
+    }
+    return ret;
+  }
+
+  invert() {
     console.log('invert:');
   }
 }
-
-
